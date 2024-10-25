@@ -16,30 +16,27 @@ public class Main {
         //build up the path
         final Path currentWorkingDir = Paths.get("").toAbsolutePath();
         final Path watchPath = Paths.get(currentWorkingDir.toString(), isNull(uploadfiles) ? "uploadfiles" : uploadfiles);
-
+        final Uploader uploader = new Uploader();
         final DirectoryWatcher watcher = new DirectoryWatcher.Builder()
-            .addDirectories(watchPath)
-            .setPreExistingAsCreated(true)
-            .build((event, path) -> {
-                switch (event) {
-                    case ENTRY_CREATE:
-                        //TODO:
-                        // upload to tika service
-                        // upload the response into the embedding ollama instant
-                        // upload the embedding string with all the meta data from the file into an vector DB
-                        LOGGER.info(path + " created.");
-                        break;
-                    case ENTRY_MODIFY:
-                        LOGGER.info(path + " modified.");
-                        break;
-                    case ENTRY_DELETE:
-                        LOGGER.info(path + " deleted.");
-                        break;
-                    default:
-                        LOGGER.severe("default event");
-                        break;
-                }
-            });
+                .addDirectories(watchPath)
+                .setPreExistingAsCreated(true)
+                .build((event, path) -> {
+                    switch (event) {
+                        case ENTRY_CREATE:
+                            LOGGER.info(path + " created.");
+                            uploader.uploadToTika(path);
+                            break;
+                        case ENTRY_MODIFY:
+                            LOGGER.info(path + " modified.");
+                            break;
+                        case ENTRY_DELETE:
+                            LOGGER.info(path + " deleted.");
+                            break;
+                        default:
+                            LOGGER.severe("default event");
+                            break;
+                    }
+                });
 
         try {
             // Actual watching starts here
