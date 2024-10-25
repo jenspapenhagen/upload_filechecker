@@ -1,5 +1,8 @@
 package de.papenhagen;
 
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -37,6 +40,9 @@ public class Uploader {
         } catch (IOException | InterruptedException ex) {
             LOGGER.severe("Exception on upload to TIKA" + ex.getLocalizedMessage());
         }
+
+        //json parsing
+        final JSONObject data = JSON.parseObject(jsonBody);
 
 
     }
