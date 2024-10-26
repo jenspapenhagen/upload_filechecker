@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
@@ -19,6 +20,9 @@ import static java.util.Objects.isNull;
 public class Uploader {
 
     private static final Logger LOGGER = Logger.getLogger(Uploader.class.getName());
+
+    //20MB
+    private static final int MAX_FILE_SIZE = 20_000_000;
 
     private static final String TIKA_URL = System.getProperty("tikaURL");
     private static final String OLLAMA_API_URL = System.getProperty("ollamaURL");
@@ -31,6 +35,16 @@ public class Uploader {
         LOGGER.info("path: " + path);
         final String fileName = path.getFileName().toString();
         LOGGER.info("fileName: " + fileName);
+        try {
+            final long fileSize = Files.size(path);
+            LOGGER.info("fileSize: " + fileSize);
+            if (fileSize > MAX_FILE_SIZE) {
+                LOGGER.severe("FileSize to big");
+                return;
+            }
+        } catch (IOException ex) {
+            LOGGER.severe("Exception on file size check: " + ex.getLocalizedMessage());
+        }
 
         // Step 1:
         // upload the file to Apache Tika
@@ -113,7 +127,7 @@ public class Uploader {
         // more infos: https://qdrant.tech/
         //TODO: Maybe later we will change the vector DB. Check for state of sqlite-vec - https://github.com/asg017/sqlite-vec
         try (final HttpClient client = HttpClient.newHttpClient()) {
-               final HttpRequest request = HttpRequest.newBuilder()
+            final HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(isNull(VECTOR_URL) ? "http://localhost:6333/collections/test_collection/points?wait=true" : VECTOR_URL))
                     .PUT(HttpRequest.BodyPublishers.ofString(vectorPayload.toJSONString()))
                     .setHeader("Content-Type", "application/json")
