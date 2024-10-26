@@ -2,8 +2,12 @@
 this small part of the pipeline is very important.
 
 
-this java tool is used as glue. <br>
-for checking the uploaded files <br>
-and pipe them to the tika server <br>
-use the result of this to send this to the embedding endpoint of ollama <br>
-with this embedding and the meta we create a entrie in the vector DB. <br>
+Diagram of Dataflow
+
+```mermaid
+graph TB;
+    id1(File get created in Folder)-->id2(File send to Apache TIKA)
+    id1-->id5(Filename)-->id4
+    id2-->id3(Text input of the file get embedded)
+    id3-->id4(uploaded to vector DB)
+```
