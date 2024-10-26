@@ -28,9 +28,9 @@ public class Uploader {
         if (isNull(path)) {
             return;
         }
-        LOGGER.info("path:" + path);
+        LOGGER.info("path: " + path);
         final String fileName = path.getFileName().toString();
-        LOGGER.info("fileName:" + fileName);
+        LOGGER.info("fileName: " + fileName);
 
         // Step 1:
         // upload the file to Apache Tika
@@ -45,7 +45,7 @@ public class Uploader {
             final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             textBody = response.body();
         } catch (IOException | InterruptedException ex) {
-            LOGGER.severe("Exception on upload to TIKA" + ex.getLocalizedMessage());
+            LOGGER.severe("Exception on upload to TIKA: " + ex.getLocalizedMessage());
         }
 
         LOGGER.info(textBody);
@@ -76,7 +76,7 @@ public class Uploader {
             final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             jsonBody = response.body();
         } catch (IOException | InterruptedException ex) {
-            LOGGER.severe("Exception on upload to OLLAMA" + ex.getLocalizedMessage());
+            LOGGER.severe("Exception on upload to OLLAMA: " + ex.getLocalizedMessage());
         }
 
         LOGGER.info(jsonBody);
@@ -127,7 +127,7 @@ public class Uploader {
             }
 
         } catch (IOException | InterruptedException ex) {
-            LOGGER.severe("Exception on upload to the vector DB" + ex.getLocalizedMessage());
+            LOGGER.severe("Exception on upload to the vector DB: " + ex.getLocalizedMessage());
         }
 
     }
