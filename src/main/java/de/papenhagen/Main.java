@@ -1,5 +1,6 @@
 package de.papenhagen;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
@@ -11,12 +12,20 @@ public class Main {
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) {
-        //getting the env
-        final String uploadfiles = System.getProperty("uploadfiles");
+
+        final String uploadFiles = System.getProperty("uploadfiles");
+
         //build up the path
         final Path currentWorkingDir = Paths.get("").toAbsolutePath();
-        final Path watchPath = Paths.get(currentWorkingDir.toString(), isNull(uploadfiles) ? "uploadfiles" : uploadfiles);
+        final Path watchPath = Paths.get(currentWorkingDir.toString(), isNull(uploadFiles) ? "uploadfiles" : uploadFiles);
+
+        if(!Files.exists(watchPath)) {
+            LOGGER.severe("Path not existing");
+            return;
+        }
+
         final Uploader uploader = new Uploader();
+
         final DirectoryWatcher watcher = new DirectoryWatcher.Builder()
                 .addDirectories(watchPath)
                 .setPreExistingAsCreated(true)
@@ -39,7 +48,7 @@ public class Main {
                 });
 
         try {
-            // Actual watching starts here
+            // Actual directory watching starts here
             watcher.start();
 
         } catch (Exception e) {
