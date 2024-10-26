@@ -48,6 +48,12 @@ public class Uploader {
             return;
         }
 
+        if (fileName.endsWith(".pdf") || fileIsAnImage(path)) {
+            //all fine
+        } else {
+            LOGGER.severe("File is in the right format. PDF or JPG/JPEG");
+            return;
+        }
 
         // Step 1:
         // upload the file to Apache Tika

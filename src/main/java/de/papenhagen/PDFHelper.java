@@ -10,7 +10,6 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.text.PDFTextStripper;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
@@ -19,8 +18,14 @@ public class PDFHelper {
 
     private static final Logger LOGGER = Logger.getLogger(PDFHelper.class.getName());
 
+    /**
+     * this metod try to check if these PDFs are only scanned images.
+     * WARNING: this is far from perfect
+     *
+     * @param path to the PDF
+     * @return ture if the PDF only contains images else, it is a normal txt base PDF.
+     */
     public static boolean isImageAsPage(final Path path) {
-
         int numberOfImage = 0;
         try {
             final PDDocument doc = Loader.loadPDF(path.toFile());
@@ -38,13 +43,15 @@ public class PDFHelper {
 
             }
             doc.close();
-            // pdf pages if equal to the images
+
+            // PDF pages if equal to the count images
             if (numberOfImage == numberOfPages) {
                 //"Scanned pdf"
                 return true;
             } else {
                 return false;
             }
+
         } catch (IOException ex) {
             LOGGER.severe("Exception on image check of given PDF: " + ex.getLocalizedMessage());
             return false;
