@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 public class Uploader {
 
@@ -47,27 +48,31 @@ public class Uploader {
             return;
         }
 
-        boolean imageAsPage = PDFHelper.isImageAsPage(path);
-        if (!imageAsPage) {
-            LOGGER.severe("PDF do not need ORC");
-            return;
-        }
-
 
         // Step 1:
         // upload the file to Apache Tika
         // more infos: https://tika.apache.org/
         String textBody = null;
-        try (final HttpClient client = HttpClient.newHttpClient()) {
-            final HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(isNull(TIKA_URL) ? "http://localhost:9998/tika" : TIKA_URL))
-                    .PUT(HttpRequest.BodyPublishers.ofFile(path))
-                    .build();
+        if (fileIsAnImage(path) || PDFHelper.isImageAsPage(path)) {
+            LOGGER.info("PDF do need ORC");
+            try (final HttpClient client = HttpClient.newHttpClient()) {
+                final HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(isNull(TIKA_URL) ? "http://localhost:9998/tika" : TIKA_URL))
+                        .PUT(HttpRequest.BodyPublishers.ofFile(path))
+                        .build();
 
-            final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            textBody = response.body();
-        } catch (IOException | InterruptedException ex) {
-            LOGGER.severe("Exception on upload to TIKA: " + ex.getLocalizedMessage());
+                final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                textBody = response.body();
+            } catch (IOException | InterruptedException ex) {
+                LOGGER.severe("Exception on upload to TIKA: " + ex.getLocalizedMessage());
+            }
+        } else {
+            final String textFromThePdf = PDFHelper.getText(path);
+            if (isNull(textFromThePdf) && !fileIsAnImage(path)) {
+                LOGGER.severe("can not read the text from the given PDF");
+            } else {
+                textBody = textFromThePdf;
+            }
         }
 
         LOGGER.info(textBody);
@@ -152,6 +157,20 @@ public class Uploader {
             LOGGER.severe("Exception on upload to the vector DB: " + ex.getLocalizedMessage());
         }
 
+    }
+
+    private boolean fileIsAnImage(final Path path) {
+        try {
+            final String mimetype = Files.probeContentType(path);
+            if (nonNull(mimetype) && mimetype.split("/")[0].equals("image")) {
+                return true;
+            }
+        } catch (IOException ex) {
+            LOGGER.severe("Exception on upload to the vector DB: " + ex.getLocalizedMessage());
+            return false;
+        }
+
+        return false;
     }
 
 
