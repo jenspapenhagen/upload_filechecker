@@ -111,7 +111,7 @@ public class Uploader {
         // upload the payload into a vector DB
         // We use as vector DB Qdrant
         // more infos: https://qdrant.tech/
-        //TODO: Maybe later we will change the vector DB. Check for state of sqlite-vec
+        //TODO: Maybe later we will change the vector DB. Check for state of sqlite-vec - https://github.com/asg017/sqlite-vec
         try (final HttpClient client = HttpClient.newHttpClient()) {
                final HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(isNull(VECTOR_URL) ? "http://localhost:6333/collections/test_collection/points?wait=true" : VECTOR_URL))
