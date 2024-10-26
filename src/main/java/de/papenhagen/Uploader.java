@@ -44,7 +44,15 @@ public class Uploader {
             }
         } catch (IOException ex) {
             LOGGER.severe("Exception on file size check: " + ex.getLocalizedMessage());
+            return;
         }
+
+        boolean imageAsPage = PDFHelper.isImageAsPage(path);
+        if (!imageAsPage) {
+            LOGGER.severe("PDF do not need ORC");
+            return;
+        }
+
 
         // Step 1:
         // upload the file to Apache Tika
