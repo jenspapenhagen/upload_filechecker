@@ -1,9 +1,9 @@
 services:
- filechecker:
-  image: upload_filechecker:latest
-  container_name: filechecker
-  volumes:
-  - ./uploadfiles:/app/uploadfiles
-  env_file:
-  - dev.env
-  #- prod.env
+    filechecker:
+        image: upload_filechecker:latest
+        container_name: filechecker
+        volumes:
+            - ./uploadfiles:/app/uploadfiles
+        env_file:
+            - dev.env
+        #- prod.env
