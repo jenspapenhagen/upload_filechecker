@@ -6,3 +6,4 @@ services:
   - ./uploadfiles:/app/uploadfiles
   env_file:
   - dev.env
+  #- prod.env
