@@ -21,13 +21,20 @@ import static java.util.Objects.nonNull;
 public class Uploader {
 
     private static final Logger LOGGER = Logger.getLogger(Uploader.class.getName());
+    
+    private static final int MAX_FILE_SIZE = 20_000_000; //20MB
+    private static final int MIN_FILE_SIZE = 1_000; //1KB
 
-    //20MB
-    private static final int MAX_FILE_SIZE = 20_000_000;
+    private static final String TIKA_URL = System.getenv("tikaURL");
+    private static final String OLLAMA_API_URL = System.getenv("ollamaURL");
+    private static final String VECTOR_URL = System.getenv("vectorURL");
 
-    private static final String TIKA_URL = System.getProperty("tikaURL");
-    private static final String OLLAMA_API_URL = System.getProperty("ollamaURL");
-    private static final String VECTOR_URL = System.getProperty("vectorURL");
+    public Uploader() {
+        LOGGER.info("checking the env: ");
+        LOGGER.info("TIKA_URL: " + TIKA_URL);
+        LOGGER.info("OLLAMA_API_URL: " + OLLAMA_API_URL);
+        LOGGER.info("VECTOR_URL: " + VECTOR_URL);
+    }
 
     public void uploadToTika(final Path path) {
         if (isNull(path)) {
@@ -39,8 +46,8 @@ public class Uploader {
         try {
             final long fileSize = Files.size(path);
             LOGGER.info("fileSize: " + fileSize);
-            if (fileSize > MAX_FILE_SIZE) {
-                LOGGER.severe("FileSize to big");
+            if (fileSize > MAX_FILE_SIZE && fileSize < MIN_FILE_SIZE ) {
+                LOGGER.severe("FileSize not fitting for the later use.");
                 return;
             }
         } catch (IOException ex) {
@@ -49,7 +56,7 @@ public class Uploader {
         }
 
         if (fileName.endsWith(".pdf") || fileIsAnImage(path)) {
-            //all fine
+            //all fine. Empty if body for better reading.
         } else {
             LOGGER.severe("File is in the right format. PDF or JPG/JPEG");
             return;
@@ -60,7 +67,7 @@ public class Uploader {
         // more infos: https://tika.apache.org/
         String textBody = null;
         if (fileIsAnImage(path) || PDFHelper.isImageAsPage(path)) {
-            LOGGER.info("PDF do need ORC");
+            LOGGER.info("File need ORC for getting the content");
             try (final HttpClient client = HttpClient.newHttpClient()) {
                 final HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(isNull(TIKA_URL) ? "http://localhost:9998/tika" : TIKA_URL))
@@ -71,16 +78,18 @@ public class Uploader {
                 textBody = response.body();
             } catch (IOException | InterruptedException ex) {
                 LOGGER.severe("Exception on upload to TIKA: " + ex.getLocalizedMessage());
+                return;
             }
         } else {
             final String textFromThePdf = PDFHelper.getText(path);
             if (isNull(textFromThePdf) && !fileIsAnImage(path)) {
                 LOGGER.severe("can not read the text from the given PDF");
+                return;
             } else {
                 textBody = textFromThePdf;
             }
         }
-
+        
         LOGGER.info(textBody);
 
         // Step 2:
@@ -110,6 +119,7 @@ public class Uploader {
             jsonBody = response.body();
         } catch (IOException | InterruptedException ex) {
             LOGGER.severe("Exception on upload to OLLAMA: " + ex.getLocalizedMessage());
+            return;
         }
 
         LOGGER.info(jsonBody);
@@ -157,10 +167,12 @@ public class Uploader {
                 LOGGER.info("upload successful");
             } else {
                 LOGGER.severe("Some Problems with the upload of the embedding into the vector DB");
+                return;
             }
 
         } catch (IOException | InterruptedException ex) {
             LOGGER.severe("Exception on upload to the vector DB: " + ex.getLocalizedMessage());
+            return;
         }
 
     }

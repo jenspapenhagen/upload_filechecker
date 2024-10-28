@@ -13,7 +13,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        final String uploadFiles = System.getProperty("uploadfiles");
+        final String uploadFiles = System.getenv("uploadfiles");
 
         //build up the path
         final Path currentWorkingDir = Paths.get("").toAbsolutePath();
