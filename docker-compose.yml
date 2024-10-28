@@ -1,0 +1,7 @@
+services:
+ filechecker:
+  image: upload_filechecker:latest
+  volumes:
+  - ./uploadfiles:/app/uploadfiles
+  env_file:
+  - dev.env
