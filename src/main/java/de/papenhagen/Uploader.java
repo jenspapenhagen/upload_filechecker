@@ -1,9 +1,5 @@
 package de.papenhagen;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -12,11 +8,14 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 
 public class Uploader {
 
@@ -110,7 +109,7 @@ public class Uploader {
             ollamaPayload.put("prompt", textBody);
 
             final HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(isNull(OLLAMA_API_URL) ? "http://localhost:11434/api/embeddings" : OLLAMA_API_URL))
+                    .uri(URI.create(isNull(OLLAMA_API_URL) ? "http://localhost:11434/api/embed" : OLLAMA_API_URL))
                     .POST(HttpRequest.BodyPublishers.ofString(ollamaPayload.toJSONString()))
                     .setHeader("Content-Type", "application/x-www-form-urlencoded")
                     .build();
