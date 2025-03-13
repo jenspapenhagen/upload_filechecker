@@ -99,14 +99,16 @@ public class Uploader {
         //        "nomic-embed-text" is a large context length text encoder that surpasses
         //        OpenAI "text-embedding-ada-002" and "text-embedding-3-small"
         //        performance on short and long context tasks.
-        //TODO: Maybe later we will use a 1b or 3b embedding model to save some RAM and CPU/GPU.
-        // Check ollama
+        //We test: https://ollama.com/library/snowflake-arctic-embed
+        // https://www.snowflake.com/en/blog/introducing-snowflake-arctic-embed-snowflakes-state-of-the-art-text-embedding-family-of-models/
+        // MTEB Retrieval Score 55,98
+        // https://github.com/ollama/ollama/blob/main/docs/api.md#generate-embeddings
         String jsonBody = null;
         try (final HttpClient client = HttpClient.newHttpClient()) {
 
             final JSONObject ollamaPayload = new JSONObject();
-            ollamaPayload.put("model", "nomic-embed-text");
-            ollamaPayload.put("prompt", textBody);
+            ollamaPayload.put("model", "snowflake-arctic-embed:335m");
+            ollamaPayload.put("input", textBody);
 
             final HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(isNull(OLLAMA_API_URL) ? "http://localhost:11434/api/embed" : OLLAMA_API_URL))
@@ -126,11 +128,11 @@ public class Uploader {
         // Step 3:
         // parsing the JSON of the embedding
         final JSONObject data = JSON.parseObject(jsonBody);
-        if (isNull(data) || !data.containsKey("embedding")) {
+        if (isNull(data) || !data.containsKey("embeddings")) {
             LOGGER.severe("no embedding found");
             return;
         }
-        final JSONArray embedding = data.getJSONArray("embedding");
+        final JSONArray embedding = data.getJSONArray("embeddings");
         final List<Float> embeddingList = embedding.toList(Float.class);
         LOGGER.info("embeddingList size: " + embeddingList.size());
 
