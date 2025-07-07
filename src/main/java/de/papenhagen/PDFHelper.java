@@ -49,14 +49,18 @@ public class PDFHelper {
 
             }
 
+            if (numberOfImage == numberOfPages) {
+                doc.close();
+                return true;
+            }
+
             //try to extract text
             PDFTextStripper pdfStripper = new PDFTextStripper();
             boolean emptyText = pdfStripper.getText(doc).isEmpty();
 
             doc.close();
 
-            return numberOfImage == numberOfPages || emptyText;
-
+            return emptyText;
         } catch (IOException ex) {
             LOGGER.severe("Exception on image check of given PDF: " + ex.getLocalizedMessage());
             return false;
