@@ -19,17 +19,23 @@ public class PDFHelper {
     private static final Logger LOGGER = Logger.getLogger(PDFHelper.class.getName());
 
     /**
-     * this metod try to check if these PDFs are only scanned images.
+     * this method try to check if the given PDFs are only scanned images or easier to extract text.
      * WARNING: this is far from perfect
      *
      * @param path to the PDF
      * @return ture if the PDF only contains images else, it is a normal txt base PDF.
      */
-    public static boolean isImageAsPage(final Path path) {
+    public static boolean isPDFbyOCR(final Path path) {
         int numberOfImage = 0;
         try {
             final PDDocument doc = Loader.loadPDF(path.toFile());
+            if (doc.isEncrypted()) {
+                LOGGER.severe("Document is encrypted.");
+                return false;
+            }
 
+            // check amount of images and pages are listed
+            // PDF pages are equal to the count images, then we have OCR the PDF.
             final int numberOfPages = doc.getNumberOfPages();
             for (final PDPage page : doc.getPages()) {
                 final PDResources resource = page.getResources();
@@ -42,10 +48,14 @@ public class PDFHelper {
                 }
 
             }
+
+            //try to extract text
+            PDFTextStripper pdfStripper = new PDFTextStripper();
+            boolean emptyText = pdfStripper.getText(doc).isEmpty();
+
             doc.close();
 
-            // PDF pages if equal to the count images
-            return numberOfImage == numberOfPages;
+            return numberOfImage == numberOfPages || emptyText;
 
         } catch (IOException ex) {
             LOGGER.severe("Exception on image check of given PDF: " + ex.getLocalizedMessage());

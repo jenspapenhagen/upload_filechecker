@@ -63,7 +63,7 @@ public class Uploader {
         // upload the file to Apache Tika
         // more infos: https://tika.apache.org/
         String textBody = null;
-        if (fileIsAnImage(path) || PDFHelper.isImageAsPage(path)) {
+        if (fileIsAnImage(path) || PDFHelper.isPDFbyOCR(path)) {
             LOGGER.info("File need ORC for getting the content");
             try (final HttpClient client = HttpClient.newHttpClient()) {
                 final HttpRequest request = HttpRequest.newBuilder()
