@@ -45,12 +45,7 @@ public class PDFHelper {
             doc.close();
 
             // PDF pages if equal to the count images
-            if (numberOfImage == numberOfPages) {
-                //"Scanned pdf"
-                return true;
-            } else {
-                return false;
-            }
+            return numberOfImage == numberOfPages;
 
         } catch (IOException ex) {
             LOGGER.severe("Exception on image check of given PDF: " + ex.getLocalizedMessage());
