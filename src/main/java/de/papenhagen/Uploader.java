@@ -45,7 +45,7 @@ public class Uploader {
         try {
             final long fileSize = Files.size(path);
             LOGGER.info("fileSize: " + fileSize);
-            if (fileSize > MAX_FILE_SIZE && fileSize < MIN_FILE_SIZE ) {
+            if (fileSize > MAX_FILE_SIZE || fileSize < MIN_FILE_SIZE ) {
                 LOGGER.severe("FileSize not fitting for the later use.");
                 return;
             }
@@ -54,9 +54,7 @@ public class Uploader {
             return;
         }
 
-        if (fileName.endsWith(".pdf") || fileIsAnImage(path)) {
-            //all fine. Empty if body for better reading.
-        } else {
+        if (!fileName.endsWith(".pdf") && !fileIsAnImage(path)) {
             LOGGER.severe("File is in the right format. PDF or JPG/JPEG");
             return;
         }
